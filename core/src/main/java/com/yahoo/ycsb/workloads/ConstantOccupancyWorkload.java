@@ -19,6 +19,8 @@ package com.yahoo.ycsb.workloads;
 import com.yahoo.ycsb.Client;
 import com.yahoo.ycsb.WorkloadException;
 import com.yahoo.ycsb.generator.NumberGenerator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Properties;
 
@@ -43,6 +45,9 @@ import java.util.Properties;
  * </p>
  */
 public class ConstantOccupancyWorkload extends CoreWorkload {
+
+  private static final Logger log = LogManager.getLogger(ConstantOccupancyWorkload.class);
+
   private long disksize;
   private long storageages;
   private double occupancy;
@@ -67,7 +72,7 @@ public class ConstantOccupancyWorkload extends CoreWorkload {
     if (p.getProperty(Client.RECORD_COUNT_PROPERTY) != null ||
         p.getProperty(Client.INSERT_COUNT_PROPERTY) != null ||
         p.getProperty(Client.OPERATION_COUNT_PROPERTY) != null) {
-      System.err.println("Warning: record, insert or operation count was set prior to initting " +
+      log.error("Warning: record, insert or operation count was set prior to initting " +
           "ConstantOccupancyWorkload.  Overriding old values.");
     }
     NumberGenerator g = CoreWorkload.getFieldLengthGenerator(p);

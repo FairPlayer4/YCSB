@@ -16,62 +16,22 @@ permissions and limitations under the License. See accompanying
 LICENSE file.
 -->
 
-Yahoo! Cloud System Benchmark (YCSB)
+Embedded YCSB
 ====================================
-[![Build Status](https://travis-ci.org/brianfrankcooper/YCSB.png?branch=master)](https://travis-ci.org/brianfrankcooper/YCSB)
 
-Links
+Modified version for embedded use in Java projects.
+
+Used to benchmark a database multiple times without shutting down the JVM.
+
+Intended to be used as library.
+
+Uses log4j2 for logging so be sure to add configurations for that if you want to log output.
+
+
+Links to original YCSB
 -----
 http://wiki.github.com/brianfrankcooper/YCSB/  
 https://labs.yahoo.com/news/yahoo-cloud-serving-benchmark/
 ycsb-users@yahoogroups.com  
 
-Getting Started
----------------
 
-1. Download the [latest release of YCSB](https://github.com/brianfrankcooper/YCSB/releases/latest):
-
-    ```sh
-    curl -O --location https://github.com/brianfrankcooper/YCSB/releases/download/0.12.0/ycsb-0.12.0.tar.gz
-    tar xfvz ycsb-0.12.0.tar.gz
-    cd ycsb-0.12.0
-    ```
-    
-2. Set up a database to benchmark. There is a README file under each binding 
-   directory.
-
-3. Run YCSB command. 
-
-    On Linux:
-    ```sh
-    bin/ycsb.sh load basic -P workloads/workloada
-    bin/ycsb.sh run basic -P workloads/workloada
-    ```
-
-    On Windows:
-    ```bat
-    bin/ycsb.bat load basic -P workloads\workloada
-    bin/ycsb.bat run basic -P workloads\workloada
-    ```
-
-  Running the `ycsb` command without any argument will print the usage. 
-   
-  See https://github.com/brianfrankcooper/YCSB/wiki/Running-a-Workload
-  for a detailed documentation on how to run a workload.
-
-  See https://github.com/brianfrankcooper/YCSB/wiki/Core-Properties for 
-  the list of available workload properties.
-
-Building from source
---------------------
-
-YCSB requires the use of Maven 3; if you use Maven 2, you may see [errors
-such as these](https://github.com/brianfrankcooper/YCSB/issues/406).
-
-To build the full distribution, with all database bindings:
-
-    mvn clean package
-
-To build a single database binding:
-
-    mvn -pl com.yahoo.ycsb:mongodb-binding -am clean package

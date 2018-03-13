@@ -18,6 +18,8 @@
 package com.yahoo.ycsb;
 
 import org.apache.htrace.core.Tracer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Properties;
 
@@ -25,6 +27,9 @@ import java.util.Properties;
  * Creates a DB layer by dynamically classloading the specified DB class.
  */
 public final class DBFactory {
+
+  private static final Logger log = LogManager.getLogger(DBFactory.class);
+
   private DBFactory() {
     // not used
   }
@@ -39,7 +44,7 @@ public final class DBFactory {
 
       ret = (DB) dbclass.newInstance();
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("", e);
       return null;
     }
 

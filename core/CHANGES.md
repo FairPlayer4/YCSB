@@ -15,6 +15,14 @@ permissions and limitations under the License. See accompanying
 LICENSE file.
 -->
 
+Changes in core-embedded version
+
+- Removed all System.exit calls
+- Replaced System.out and System.err with log4j2 for logging
+- Added additional logging in various classes
+- Set Measurements Singleton to null after the benchmark was run (at the end of the client main method)
+
+
 When used as a latency under load benchmark YCSB in it's original form suffers from
 Coordinated Omission[1] and related measurement issue:
 

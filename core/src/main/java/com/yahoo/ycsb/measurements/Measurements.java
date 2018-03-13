@@ -19,6 +19,8 @@ package com.yahoo.ycsb.measurements;
 
 import com.yahoo.ycsb.Status;
 import com.yahoo.ycsb.measurements.exporter.MeasurementsExporter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -39,6 +41,8 @@ public class Measurements {
     TIMESERIES,
     RAW
   }
+
+  private static final Logger log = LogManager.getLogger(Measurements.class);
 
   public static final String MEASUREMENT_TYPE_PROPERTY = "measurementtype";
   private static final String MEASUREMENT_TYPE_PROPERTY_DEFAULT = "hdrhistogram";
@@ -64,6 +68,10 @@ public class Measurements {
       singleton = new Measurements(measurementproperties);
     }
     return singleton;
+  }
+
+  public static synchronized void resetMeasurements() {
+    singleton = null;
   }
 
   private final ConcurrentHashMap<String, OneMeasurement> opToMesurementMap;
@@ -189,9 +197,7 @@ public class Measurements {
       m.measure(latency);
     } catch (java.lang.ArrayIndexOutOfBoundsException e) {
       // This seems like a terribly hacky way to cover up for a bug in the measurement code
-      System.out.println("ERROR: java.lang.ArrayIndexOutOfBoundsException - ignoring and continuing");
-      e.printStackTrace();
-      e.printStackTrace(System.out);
+      log.error("ERROR: java.lang.ArrayIndexOutOfBoundsException - ignoring and continuing", e);
     }
   }
 
@@ -208,9 +214,7 @@ public class Measurements {
       m.measure(latency);
     } catch (java.lang.ArrayIndexOutOfBoundsException e) {
       // This seems like a terribly hacky way to cover up for a bug in the measurement code
-      System.out.println("ERROR: java.lang.ArrayIndexOutOfBoundsException - ignoring and continuing");
-      e.printStackTrace();
-      e.printStackTrace(System.out);
+      log.error("ERROR: java.lang.ArrayIndexOutOfBoundsException - ignoring and continuing", e);
     }
   }
 

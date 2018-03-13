@@ -21,6 +21,8 @@ import java.util.Map;
 import com.yahoo.ycsb.measurements.Measurements;
 import org.apache.htrace.core.TraceScope;
 import org.apache.htrace.core.Tracer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -29,6 +31,9 @@ import java.util.*;
  * Also reports latency separately between OK and failed operations.
  */
 public class DBWrapper extends DB {
+
+  private static final Logger log = LogManager.getLogger(DBWrapper.class);
+
   private final DB db;
   private final Measurements measurements;
   private final Tracer tracer;
@@ -97,7 +102,7 @@ public class DBWrapper extends DB {
         }
       }
 
-      System.err.println("DBWrapper: report latency for each error is " +
+      log.info("DBWrapper: report latency for each error is " +
           this.reportLatencyForEachError + " and specific error codes to track" +
           " for latency are: " + this.latencyTrackedErrors.toString());
     }

@@ -24,12 +24,17 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.yahoo.ycsb.workloads.TimeSeriesWorkload;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Basic DB for printing out time series workloads and/or tracking the distribution
  * of keys and fields.
  */
 public class BasicTSDB extends BasicDB {
+
+  private static final Logger log = LogManager.getLogger(BasicTSDB.class);
+
 
   /** Time series workload specific counters. */
   protected static Map<Long, Integer> timestamps;
@@ -83,7 +88,7 @@ public class BasicTSDB extends BasicDB {
       }
 
       sb.append("]");
-      System.out.println(sb);
+      log.info(sb);
     }
 
     if (count) {
@@ -143,7 +148,7 @@ public class BasicTSDB extends BasicDB {
         }
       }
       sb.append("]");
-      System.out.println(sb);
+      log.info(sb);
     }
 
     if (count) {
@@ -196,7 +201,7 @@ public class BasicTSDB extends BasicDB {
         }
       }
       sb.append("]");
-      System.out.println(sb);
+      log.info(sb);
     }
 
     if (count) {
@@ -227,9 +232,9 @@ public class BasicTSDB extends BasicDB {
   public void cleanup() {
     super.cleanup();
     if (count && counter < 1) {
-      System.out.println("[TIMESTAMPS], Unique, " + timestamps.size());
-      System.out.println("[FLOATS], Unique series, " + floats.size());
-      System.out.println("[INTEGERS], Unique series, " + integers.size());
+      log.info("[TIMESTAMPS], Unique, " + timestamps.size());
+      log.info("[FLOATS], Unique series, " + floats.size());
+      log.info("[INTEGERS], Unique series, " + integers.size());
       
       long minTs = Long.MAX_VALUE;
       long maxTs = Long.MIN_VALUE;
@@ -241,8 +246,8 @@ public class BasicTSDB extends BasicDB {
           minTs = ts;
         }
       }
-      System.out.println("[TIMESTAMPS], Min, " + minTs);
-      System.out.println("[TIMESTAMPS], Max, " + maxTs);
+      log.info("[TIMESTAMPS], Min, " + minTs);
+      log.info("[TIMESTAMPS], Max, " + maxTs);
     }
   }
   

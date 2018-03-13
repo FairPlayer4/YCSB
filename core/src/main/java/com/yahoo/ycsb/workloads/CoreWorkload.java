@@ -21,6 +21,8 @@ import com.yahoo.ycsb.*;
 import com.yahoo.ycsb.generator.*;
 import com.yahoo.ycsb.generator.UniformLongGenerator;
 import com.yahoo.ycsb.measurements.Measurements;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.*;
@@ -62,6 +64,9 @@ import java.util.*;
  * </ul>
  */
 public class CoreWorkload extends Workload {
+
+  private static final Logger log = LogManager.getLogger(CoreWorkload.class);
+
   /**
    * The name of the database table to run queries against.
    */
@@ -384,9 +389,9 @@ public class CoreWorkload extends Workload {
         Integer.parseInt(p.getProperty(INSERT_COUNT_PROPERTY, String.valueOf(recordcount - insertstart)));
     // Confirm valid values for insertstart and insertcount in relation to recordcount
     if (recordcount < (insertstart + insertcount)) {
-      System.err.println("Invalid combination of insertstart, insertcount and recordcount.");
-      System.err.println("recordcount must be bigger than insertstart + insertcount.");
-      System.exit(-1);
+      log.error("Invalid combination of insertstart, insertcount and recordcount.");
+      log.error("recordcount must be bigger than insertstart + insertcount.");
+      return; //TODO stop everything
     }
     zeropadding =
         Integer.parseInt(p.getProperty(ZERO_PADDING_PROPERTY, ZERO_PADDING_PROPERTY_DEFAULT));
@@ -403,8 +408,8 @@ public class CoreWorkload extends Workload {
     if (dataintegrity && !(p.getProperty(
         FIELD_LENGTH_DISTRIBUTION_PROPERTY,
         FIELD_LENGTH_DISTRIBUTION_PROPERTY_DEFAULT)).equals("constant")) {
-      System.err.println("Must have constant field size to check data integrity.");
-      System.exit(-1);
+      log.error("Must have constant field size to check data integrity.");
+      return; //TODO stop everything
     }
 
     if (p.getProperty(INSERT_ORDER_PROPERTY, INSERT_ORDER_PROPERTY_DEFAULT).compareTo("hashed") == 0) {
@@ -567,7 +572,7 @@ public class CoreWorkload extends Workload {
       // even if one single insertion fails. User can optionally configure
       // an insertion retry limit (default is 0) to enable retry.
       if (++numOfRetries <= insertionRetryLimit) {
-        System.err.println("Retrying insertion, retry count: " + numOfRetries);
+        log.error("Retrying insertion, retry count: " + numOfRetries);
         try {
           // Sleep for a random number between [0.8, 1.2)*insertionRetryInterval.
           int sleepTime = (int) (1000 * insertionRetryInterval * (0.8 + 0.4 * Math.random()));
@@ -577,7 +582,7 @@ public class CoreWorkload extends Workload {
         }
 
       } else {
-        System.err.println("Error inserting, not retrying any more. number of attempts: " + numOfRetries +
+        log.error("Error inserting, not retrying any more. number of attempts: " + numOfRetries +
             "Insertion Retry Limit: " + insertionRetryLimit);
         break;
 

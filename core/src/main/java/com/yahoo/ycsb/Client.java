@@ -23,6 +23,8 @@ import com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter;
 import org.apache.htrace.core.HTraceConfiguration;
 import org.apache.htrace.core.TraceScope;
 import org.apache.htrace.core.Tracer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -40,6 +42,9 @@ import java.util.concurrent.locks.LockSupport;
  * A thread to periodically show the status of the experiment to reassure you that progress is being made.
  */
 class StatusThread extends Thread {
+
+  private static final Logger log = LogManager.getLogger(StatusThread.class);
+  
   // Counts down each of the clients completing
   private final CountDownLatch completeLatch;
 
@@ -187,10 +192,10 @@ class StatusThread extends Thread {
 
     msg.append(Measurements.getMeasurements().getSummary());
 
-    System.err.println(msg);
+    log.info(msg);
 
     if (standardstatus) {
-      System.out.println(msg);
+      //log.info(msg);
     }
     return totalops;
   }
@@ -360,6 +365,9 @@ final class RemainingFormatter {
  */
 class ClientThread implements Runnable {
   // Counts down each of the clients completing.
+
+  private static final Logger log = LogManager.getLogger(ClientThread.class);
+
   private final CountDownLatch completeLatch;
 
   private static boolean spinSleep;
@@ -422,16 +430,14 @@ class ClientThread implements Runnable {
     try {
       db.init();
     } catch (DBException e) {
-      e.printStackTrace();
-      e.printStackTrace(System.out);
+      log.error("", e);
       return;
     }
 
     try {
       workloadstate = workload.initThread(props, threadid, threadcount);
     } catch (WorkloadException e) {
-      e.printStackTrace();
-      e.printStackTrace(System.out);
+      log.error("", e);
       return;
     }
 
@@ -474,17 +480,15 @@ class ClientThread implements Runnable {
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      e.printStackTrace(System.out);
-      System.exit(0);
+      log.error("", e);
+      return;
     }
 
     try {
       measurements.setIntendedStartTimeNs(0);
       db.cleanup();
     } catch (DBException e) {
-      e.printStackTrace();
-      e.printStackTrace(System.out);
+      log.error("", e);
     } finally {
       completeLatch.countDown();
     }
@@ -524,6 +528,8 @@ public final class Client {
   private Client() {
     //not used
   }
+
+  private static final Logger log = LogManager.getLogger(Client.class);
 
   public static final String DEFAULT_RECORD_COUNT = "0";
 
@@ -614,37 +620,37 @@ public final class Client {
   private static final String CLIENT_EXPORT_MEASUREMENTS_SPAN = "Client#export_measurements";
 
   public static void usageMessage() {
-    System.out.println("Usage: java com.yahoo.ycsb.Client [options]");
-    System.out.println("Options:");
-    System.out.println("  -threads n: execute using n threads (default: 1) - can also be specified as the \n" +
+    log.info("Usage: java com.yahoo.ycsb.Client [options]");
+    log.info("Options:");
+    log.info("  -threads n: execute using n threads (default: 1) - can also be specified as the \n" +
         "        \"threadcount\" property using -p");
-    System.out.println("  -target n: attempt to do n operations per second (default: unlimited) - can also\n" +
+    log.info("  -target n: attempt to do n operations per second (default: unlimited) - can also\n" +
         "       be specified as the \"target\" property using -p");
-    System.out.println("  -load:  run the loading phase of the workload");
-    System.out.println("  -t:  run the transactions phase of the workload (default)");
-    System.out.println("  -db dbname: specify the name of the DB to use (default: com.yahoo.ycsb.BasicDB) - \n" +
+    log.info("  -load:  run the loading phase of the workload");
+    log.info("  -t:  run the transactions phase of the workload (default)");
+    log.info("  -db dbname: specify the name of the DB to use (default: com.yahoo.ycsb.BasicDB) - \n" +
         "        can also be specified as the \"db\" property using -p");
-    System.out.println("  -P propertyfile: load properties from the given file. Multiple files can");
-    System.out.println("           be specified, and will be processed in the order specified");
-    System.out.println("  -p name=value:  specify a property to be passed to the DB and workloads;");
-    System.out.println("          multiple properties can be specified, and override any");
-    System.out.println("          values in the propertyfile");
-    System.out.println("  -s:  show status during run (default: no status)");
-    System.out.println("  -l label:  use label for status (e.g. to label one experiment out of a whole batch)");
-    System.out.println("");
-    System.out.println("Required properties:");
-    System.out.println("  " + WORKLOAD_PROPERTY + ": the name of the workload class to use (e.g. " +
+    log.info("  -P propertyfile: load properties from the given file. Multiple files can");
+    log.info("           be specified, and will be processed in the order specified");
+    log.info("  -p name=value:  specify a property to be passed to the DB and workloads;");
+    log.info("          multiple properties can be specified, and override any");
+    log.info("          values in the propertyfile");
+    log.info("  -s:  show status during run (default: no status)");
+    log.info("  -l label:  use label for status (e.g. to label one experiment out of a whole batch)");
+    log.info("");
+    log.info("Required properties:");
+    log.info("  " + WORKLOAD_PROPERTY + ": the name of the workload class to use (e.g. " +
         "com.yahoo.ycsb.workloads.CoreWorkload)");
-    System.out.println("");
-    System.out.println("To run the transaction phase from multiple servers, start a separate client on each.");
-    System.out.println("To run the load phase from multiple servers, start a separate client on each; additionally,");
-    System.out.println("use the \"insertcount\" and \"insertstart\" properties to divide up the records " +
+    log.info("");
+    log.info("To run the transaction phase from multiple servers, start a separate client on each.");
+    log.info("To run the load phase from multiple servers, start a separate client on each; additionally,");
+    log.info("use the \"insertcount\" and \"insertstart\" properties to divide up the records " +
         "to be inserted");
   }
 
   public static boolean checkRequiredProperties(Properties props) {
     if (props.getProperty(WORKLOAD_PROPERTY) == null) {
-      System.out.println("Missing property: " + WORKLOAD_PROPERTY);
+      log.error("Missing property: " + WORKLOAD_PROPERTY);
       return false;
     }
 
@@ -678,9 +684,8 @@ public final class Client {
         exporter = (MeasurementsExporter) Class.forName(exporterStr).getConstructor(OutputStream.class)
             .newInstance(out);
       } catch (Exception e) {
-        System.err.println("Could not find exporter " + exporterStr
-            + ", will use default text reporter.");
-        e.printStackTrace();
+        log.error("Could not find exporter " + exporterStr
+            + ", will use default text reporter.", e);
         exporter = new TextMeasurementsExporter(out);
       }
 
@@ -752,7 +757,7 @@ public final class Client {
 
     initWorkload(props, warningthread, workload, tracer);
 
-    System.err.println("Starting test.");
+    log.info("Starting test.");
     final CountDownLatch completeLatch = new CountDownLatch(threadcount);
 
     final List<ClientThread> clients = initDb(dbname, props, threadcount, targetperthreadperms,
@@ -829,9 +834,8 @@ public final class Client {
         workload.cleanup();
       }
     } catch (WorkloadException e) {
-      e.printStackTrace();
-      e.printStackTrace(System.out);
-      System.exit(0);
+      log.error("", e);
+      return;
     }
 
     try {
@@ -839,12 +843,10 @@ public final class Client {
         exportMeasurements(props, opsDone, en - st);
       }
     } catch (IOException e) {
-      System.err.println("Could not export measurements, error: " + e.getMessage());
-      e.printStackTrace();
-      System.exit(-1);
+      log.error("Could not export measurements, error: " + e.getMessage(), e);
     }
-
-    System.exit(0);
+    Measurements.resetMeasurements();
+    return;
   }
 
   private static List<ClientThread> initDb(String dbname, Properties props, int threadcount,
@@ -871,7 +873,7 @@ public final class Client {
         try {
           db = DBFactory.newDB(dbname, props, tracer);
         } catch (UnknownDBException e) {
-          System.out.println("Unknown DB " + dbname);
+          log.error("Unknown DB " + dbname, e);
           initFailed = true;
           break;
         }
@@ -891,8 +893,8 @@ public final class Client {
       }
 
       if (initFailed) {
-        System.err.println("Error initializing datastore bindings.");
-        System.exit(0);
+        log.error("Error initializing datastore bindings.");
+        return clients; //TODO
       }
     }
     return clients;
@@ -911,9 +913,8 @@ public final class Client {
         warningthread.interrupt();
       }
     } catch (WorkloadException e) {
-      e.printStackTrace();
-      e.printStackTrace(System.out);
-      System.exit(0);
+      log.error("", e);
+      return;
     }
   }
 
@@ -939,7 +940,7 @@ public final class Client {
         } catch (InterruptedException e) {
           return;
         }
-        System.err.println(" (might take a few minutes for large data sets)");
+        log.info(" (might take a few minutes for large data sets)");
       }
     };
   }
@@ -950,40 +951,38 @@ public final class Client {
     try {
       Properties projectProp = new Properties();
       projectProp.load(classLoader.getResourceAsStream("project.properties"));
-      System.err.println("YCSB Client " + projectProp.getProperty("version"));
+      log.info("YCSB Client " + projectProp.getProperty("version"));
     } catch (IOException e) {
-      System.err.println("Unable to retrieve client version.");
+      log.error("Unable to retrieve client version.", e);
     }
 
-    System.err.println();
-    System.err.println("Loading workload...");
+    log.info("");
+    log.info("Loading workload...");
     try {
       Class workloadclass = classLoader.loadClass(props.getProperty(WORKLOAD_PROPERTY));
 
       return (Workload) workloadclass.newInstance();
     } catch (Exception e) {
-      e.printStackTrace();
-      e.printStackTrace(System.out);
-      System.exit(0);
+      log.error("", e);
+      return null;
     }
-
-    return null;
   }
 
   private static Properties parseArguments(String[] args) {
     Properties props = new Properties();
-    System.err.print("Command line:");
+    StringBuilder argsString = new StringBuilder("Command line:");
+    argsString.append("Command line:");
     for (String arg : args) {
-      System.err.print(" " + arg);
+      argsString.append(" " + arg);
     }
-
+    log.info(argsString.toString());
     Properties fileprops = new Properties();
     int argindex = 0;
 
     if (args.length == 0) {
       usageMessage();
-      System.out.println("At least one argument specifying a workload is required.");
-      System.exit(0);
+      log.error("At least one argument specifying a workload is required.");
+      return null;
     }
 
     while (args[argindex].startsWith("-")) {
@@ -991,8 +990,8 @@ public final class Client {
         argindex++;
         if (argindex >= args.length) {
           usageMessage();
-          System.out.println("Missing argument value for -threads.");
-          System.exit(0);
+          log.error("Missing argument value for -threads.");
+          return null;
         }
         int tcount = Integer.parseInt(args[argindex]);
         props.setProperty(THREAD_COUNT_PROPERTY, String.valueOf(tcount));
@@ -1001,8 +1000,8 @@ public final class Client {
         argindex++;
         if (argindex >= args.length) {
           usageMessage();
-          System.out.println("Missing argument value for -target.");
-          System.exit(0);
+          log.error("Missing argument value for -target.");
+          return null;
         }
         int ttarget = Integer.parseInt(args[argindex]);
         props.setProperty(TARGET_PROPERTY, String.valueOf(ttarget));
@@ -1020,8 +1019,8 @@ public final class Client {
         argindex++;
         if (argindex >= args.length) {
           usageMessage();
-          System.out.println("Missing argument value for -db.");
-          System.exit(0);
+          log.error("Missing argument value for -db.");
+          return null;
         }
         props.setProperty(DB_PROPERTY, args[argindex]);
         argindex++;
@@ -1029,8 +1028,8 @@ public final class Client {
         argindex++;
         if (argindex >= args.length) {
           usageMessage();
-          System.out.println("Missing argument value for -l.");
-          System.exit(0);
+          log.error("Missing argument value for -l.");
+          return null;
         }
         props.setProperty(LABEL_PROPERTY, args[argindex]);
         argindex++;
@@ -1038,8 +1037,8 @@ public final class Client {
         argindex++;
         if (argindex >= args.length) {
           usageMessage();
-          System.out.println("Missing argument value for -P.");
-          System.exit(0);
+          log.error("Missing argument value for -P.");
+          return null;
         }
         String propfile = args[argindex];
         argindex++;
@@ -1048,9 +1047,8 @@ public final class Client {
         try {
           myfileprops.load(new FileInputStream(propfile));
         } catch (IOException e) {
-          System.out.println("Unable to open the properties file " + propfile);
-          System.out.println(e.getMessage());
-          System.exit(0);
+          log.error("Unable to open the properties file " + propfile, e);
+          return null;
         }
 
         //Issue #5 - remove call to stringPropertyNames to make compilable under Java 1.5
@@ -1064,14 +1062,14 @@ public final class Client {
         argindex++;
         if (argindex >= args.length) {
           usageMessage();
-          System.out.println("Missing argument value for -p");
-          System.exit(0);
+          log.error("Missing argument value for -p");
+          return null;
         }
         int eq = args[argindex].indexOf('=');
         if (eq < 0) {
           usageMessage();
-          System.out.println("Argument '-p' expected to be in key=value format (e.g., -p operationcount=99999)");
-          System.exit(0);
+          log.error("Argument '-p' expected to be in key=value format (e.g., -p operationcount=99999)");
+          return null;
         }
 
         String name = args[argindex].substring(0, eq);
@@ -1080,8 +1078,8 @@ public final class Client {
         argindex++;
       } else {
         usageMessage();
-        System.out.println("Unknown option " + args[argindex]);
-        System.exit(0);
+        log.error("Unknown option " + args[argindex]);
+        return null;
       }
 
       if (argindex >= args.length) {
@@ -1092,13 +1090,13 @@ public final class Client {
     if (argindex != args.length) {
       usageMessage();
       if (argindex < args.length) {
-        System.out.println("An argument value without corresponding argument specifier (e.g., -p, -s) was found. "
+        log.error("An argument value without corresponding argument specifier (e.g., -p, -s) was found. "
             + "We expected an argument specifier and instead found " + args[argindex]);
       } else {
-        System.out.println("An argument specifier without corresponding value was found at the end of the supplied " +
+        log.error("An argument specifier without corresponding value was found at the end of the supplied " +
             "command line arguments.");
       }
-      System.exit(0);
+      return null;
     }
 
     //overwrite file properties with properties from the command line
@@ -1113,8 +1111,8 @@ public final class Client {
     props = fileprops;
 
     if (!checkRequiredProperties(props)) {
-      System.out.println("Failed check required properties.");
-      System.exit(0);
+      log.error("Failed check required properties.");
+      return null;
     }
 
     return props;
