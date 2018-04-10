@@ -63,6 +63,7 @@ public class TerminatorThread extends Thread {
           if (t.isAlive()) {
             log.warn("Still waiting for thread " + t.getName() + " to complete. " +
                 "Workload status: " + workload.isStopRequested());
+            t.interrupt();
           }
         } catch (InterruptedException e) {
           log.debug("", e);
