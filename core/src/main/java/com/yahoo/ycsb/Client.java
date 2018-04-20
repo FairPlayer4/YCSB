@@ -26,10 +26,7 @@ import org.apache.htrace.core.Tracer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -674,7 +671,7 @@ public final class Client {
       if (exportFile == null) {
         out = System.out;
       } else {
-        out = new FileOutputStream(exportFile);
+        out = new FileOutputStream(new File(exportFile));
       }
 
       // if no exporter is provided the default text one will be used
