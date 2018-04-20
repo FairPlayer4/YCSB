@@ -671,6 +671,13 @@ public final class Client {
       if (exportFile == null) {
         out = System.out;
       } else {
+        File o = new File(exportFile);
+        log.info("File exists: {}", o.exists());
+        log.info("File is File: ", o.isFile());
+        if (!o.exists()) {
+          boolean t = o.createNewFile();
+          log.info("File exists: {}", o.exists());
+        }
         out = new FileOutputStream(new File(exportFile));
       }
 
