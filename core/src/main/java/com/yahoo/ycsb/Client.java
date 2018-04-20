@@ -671,6 +671,7 @@ public final class Client {
       if (exportFile == null) {
         out = System.out;
       } else {
+        exportFile = exportFile.replace("\"", "");
         File o = new File(exportFile);
         log.info("Export File: {}", exportFile);
         log.info("Filepath: {}", o.getCanonicalPath());
