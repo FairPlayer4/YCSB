@@ -672,16 +672,7 @@ public final class Client {
         out = System.out;
       } else {
         exportFile = exportFile.replace("\"", "");
-        File o = new File(exportFile);
-        log.info("Export File: {}", exportFile);
-        log.info("Filepath: {}", o.getCanonicalPath());
-        log.info("File exists: {}", o.exists());
-        log.info("File is File: {}", o.isFile());
-        if (!o.exists()) {
-          boolean t = o.createNewFile();
-          log.info("File exists: {}", o.exists());
-        }
-        out = new FileOutputStream(new File(exportFile));
+        out = new FileOutputStream(exportFile, true);
       }
 
       // if no exporter is provided the default text one will be used
